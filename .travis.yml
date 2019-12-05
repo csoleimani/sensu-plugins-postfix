@@ -6,9 +6,6 @@ cache:
 install:
 - bundle install
 rvm:
-- 2.0
-- 2.1
-- 2.2
 - 2.3
 - 2.4.1
 notifications:
@@ -29,17 +26,23 @@ script:
 env:
   global:
     - KITCHEN_LOCAL_YAML=.kitchen.travis.yml
+before_deploy:
+- bash -c "[ ! -d bonsai/ ] && git clone https://github.com/sensu/sensu-go-bonsai-asset.git bonsai || echo 'bonsai/ exists, skipping git clone'"
 deploy:
-  provider: rubygems
+- provider: rubygems
   api_key:
     secure: LkxKFc6KYmwTfuwIhFWSktky5TiJMvI79+RpHaX3BUyEnqZMAVNxtmTXpWqqglXGjgEGeClYl1WMCXIamw2zeLlK6CEuBJXcVXs4O27UKkvfzVmiDYBITPtF02mTVCTYd5NNch67Rh5rT7wTN2hxWbiE2OFw6/WIF9hD2mr1484=
   gem: sensu-plugins-postfix
   on:
     tags: true
     all_branches: true
-    rvm: 2.0
-    rvm: 2.1
-    rvm: 2.2
     rvm: 2.3
     rvm: 2.4.1
     repo: sensu-plugins/sensu-plugins-postfix
+- provider: script
+  script: bonsai/ruby-runtime/travis-build-ruby-plugin-assets.sh sensu-plugins-postfix
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
+    rvm: 2.4.1
